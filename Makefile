@@ -5,3 +5,6 @@ init:
 
 create-role:
 	aws iam create-role --role-name $(role_name) --assume-role-policy-document file://trust-policy.json
+
+create-package:
+	zip function.zip index.js
