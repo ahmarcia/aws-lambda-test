@@ -1,5 +1,6 @@
 role_name = aws-lambda-ex
 function_name = $(role_name)-function
+layer_name = $(function_name)-layer
 
 init:
 	@echo "My first function - AWS Lambda"
@@ -30,3 +31,25 @@ invoke-function:
 	@echo "Response: \n"
 	@cat response.json
 	@echo "\n"
+
+install-dependencies:
+	npm install
+
+copy-dependencies-tmp:
+	mkdir nodejs
+	cp -r node_modules nodejs
+
+create-layer-package: install-dependencies copy-dependencies-tmp
+	zip -r dependencies.zip nodejs
+	rm -rf nodejs
+
+create-layer-dependencies:
+	aws lambda publish-layer-version --layer-name $(layer_name) \
+--description "My layer test" --license-info "MIT" \
+--zip-file fileb://dependencies.zip --compatible-runtimes nodejs12.x
+
+configure-layer: account-identity
+	@read -p "Copy and past your nunber account: " accountId; \
+	read -p "what's the version: " version; \
+	aws lambda update-function-configuration --function-name $(function_name) \
+--layers arn:aws:lambda:us-east-2:$$accountId:layer:$(layer_name):$$version
