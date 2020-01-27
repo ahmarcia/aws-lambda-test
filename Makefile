@@ -19,6 +19,11 @@ create-function: account-identity
 --zip-file fileb://function.zip --handler index.handler --runtime nodejs12.x \
 --role arn:aws:iam::$$accountId:role/$(role_name)
 
+update-function: create-package account-identity
+	@read -p "Copy and past your number account: " accountId; \
+	aws lambda update-function-code --function-name $(function_name) \
+--zip-file fileb://function.zip
+
 invoke-function:
 	aws lambda invoke --function-name $(function_name) \
 --payload '{ "key": "value" }' response.json

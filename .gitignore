@@ -1,2 +1,3 @@
 *.zip
 response.json
+node_modules/
